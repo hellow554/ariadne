@@ -233,7 +233,7 @@ impl<S: Span> Report<'_, S> {
                                 if let Some(margin) = margin.filter(|_| is_line) {
                                     margin_ptr = Some((margin, is_start));
                                 } else if !is_start && (!is_end || is_line) {
-                                    vbar = vbar.or(Some(*label).filter(|_| !is_parent));
+                                    vbar = vbar.or_else(|| Some(*label).filter(|_| !is_parent));
                                 } else if let Some((report_row, is_arrow)) = report_row {
                                     let label_row = line_labels
                                         .iter()
@@ -252,10 +252,10 @@ impl<S: Span> Report<'_, S> {
                                                 corner = Some((label, is_start));
                                             }
                                         } else if !is_start {
-                                            vbar = vbar.or(Some(*label).filter(|_| !is_parent));
+                                            vbar = vbar.or_else(|| Some(*label).filter(|_| !is_parent));
                                         }
                                     } else {
-                                        vbar = vbar.or(Some(*label).filter(|_| !is_parent && (is_start ^ (report_row < label_row))));
+                                        vbar = vbar.or_else(|| Some(*label).filter(|_| !is_parent && (is_start ^ (report_row < label_row))));
                                     }
                                 }
                             }

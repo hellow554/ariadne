@@ -43,6 +43,9 @@ impl Line {
     /// Get the character length of this line.
     pub fn len(&self) -> usize { self.len }
 
+    /// Checks whether the line is empty, e.g. contains **no** characters (even no whitespace)
+    pub fn is_empty(&self) -> bool { self.len == 0 }
+
     /// Get the offset span of this line in the original [`Source`].
     pub fn span(&self) -> Range<usize> { self.offset..self.offset + self.len }
 
@@ -86,6 +89,9 @@ impl<S: AsRef<str>> From<S> for Source {
 impl Source {
     /// Get the length of the total number of characters in the source.
     pub fn len(&self) -> usize { self.len }
+
+    /// Checks whether the source is empty, e.g. there's no sourcecode available
+    pub fn is_empty(&self) -> bool { self.len == 0 }
 
     /// Return an iterator over the characters in the source.
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {

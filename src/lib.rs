@@ -46,6 +46,11 @@ pub trait Span {
     /// Get the length of this span (difference between the start of the span and the end of the span).
     fn len(&self) -> usize { self.end().saturating_sub(self.start()) }
 
+    /// checks if he span is empty, e.g. spans over a 0 length
+    fn is_empty(&self) -> bool {
+        self.start() == self.end()
+    }
+
     /// Determine whether the span contains the given offset.
     fn contains(&self, offset: usize) -> bool { (self.start()..self.end()).contains(&offset) }
 }

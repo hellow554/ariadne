@@ -12,7 +12,7 @@ pub use crate::{
 };
 pub use yansi::Color;
 
-use crate::display::*;
+use crate::display::Show;
 use std::{
     borrow::Borrow,
     ops::Range,
@@ -169,7 +169,7 @@ impl<S: Span> Report<'_, S> {
     /// Write this diagnostic out to `stdout`.
     ///
     /// In most cases, [`Report::eprint`] is the
-    /// ['more correct'](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) function to use.
+    /// ["more correct"](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) function to use.
     pub fn print<C: Cache<S::SourceId>>(&self, cache: C) -> io::Result<()> {
         self.write(cache, io::stdout())
     }

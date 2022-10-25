@@ -95,7 +95,7 @@ impl Source {
 
     /// Return an iterator over the characters in the source.
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
-        self.lines.iter().map(|l| l.chars()).flatten()
+        self.lines.iter().flat_map(|l| l.chars())
     }
 
     /// Get access to a specific, zero-indexed [`Line`].
@@ -144,14 +144,9 @@ impl<Id: fmt::Display + Eq> Cache<Id> for (Id, Source) {
 }
 
 /// A [`Cache`] that fetches [`Source`]s from the filesystem.
+#[derive(Default)]
 pub struct FileCache {
     files: HashMap<PathBuf, Source>,
-}
-
-impl Default for FileCache {
-    fn default() -> Self {
-        Self { files: HashMap::default() }
-    }
 }
 
 impl Cache<Path> for FileCache {

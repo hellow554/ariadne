@@ -1,4 +1,4 @@
-use super::{Color, fmt};
+use super::{fmt, Color};
 use yansi::Paint;
 
 pub struct Characters {
@@ -126,7 +126,9 @@ pub struct ColorGenerator {
 }
 
 impl Default for ColorGenerator {
-    fn default() -> Self { Self::from_state([30000, 15000, 35000], 0.5) }
+    fn default() -> Self {
+        Self::from_state([30000, 15000, 35000], 0.5)
+    }
 }
 
 impl ColorGenerator {
@@ -134,7 +136,10 @@ impl ColorGenerator {
     ///
     /// The minimum brightness can be used to control the colour brightness (0.0 - 1.0). The default is 0.5.
     pub fn from_state(state: [u16; 3], min_brightness: f32) -> Self {
-        Self { state, min_brightness: min_brightness.clamp(0.0, 1.0) }
+        Self {
+            state,
+            min_brightness: min_brightness.clamp(0.0, 1.0),
+        }
     }
 
     /// Create a new [`ColorGenerator`] with the default state.
@@ -143,15 +148,28 @@ impl ColorGenerator {
     }
 
     /// Generate the next colour in the sequence.
-    #[allow(clippy::should_implement_trait, clippy::cast_possible_truncation, clippy::cast_lossless, clippy::suboptimal_flops, clippy::cast_sign_loss)]
+    #[allow(
+        clippy::should_implement_trait,
+        clippy::cast_possible_truncation,
+        clippy::cast_lossless,
+        clippy::suboptimal_flops,
+        clippy::cast_sign_loss
+    )]
     pub fn next(&mut self) -> Color {
         for i in 0..3 {
             // magic constant, one of only two that have this property!
             self.state[i] = (self.state[i] as usize).wrapping_add(40503 * (i * 4 + 1130)) as u16;
         }
-        Color::Fixed(16
-            + ((self.state[2] as f32 / 65535.0 * (1.0 - self.min_brightness) + self.min_brightness) * 5.0
-            + (self.state[1] as f32 / 65535.0 * (1.0 - self.min_brightness) + self.min_brightness) * 30.0
-            + (self.state[0] as f32 / 65535.0 * (1.0 - self.min_brightness) + self.min_brightness) * 180.0) as u8)
+        Color::Fixed(
+            16 + ((self.state[2] as f32 / 65535.0 * (1.0 - self.min_brightness)
+                + self.min_brightness)
+                * 5.0
+                + (self.state[1] as f32 / 65535.0 * (1.0 - self.min_brightness)
+                    + self.min_brightness)
+                    * 30.0
+                + (self.state[0] as f32 / 65535.0 * (1.0 - self.min_brightness)
+                    + self.min_brightness)
+                    * 180.0) as u8,
+        )
     }
 }

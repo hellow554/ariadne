@@ -10,7 +10,7 @@ fn main() {
 
     Report::build(ReportKind::Error, "b.tao", 10)
         .with_code(3)
-        .with_message(format!("Cannot add types Nat and Str"))
+        .with_message("Cannot add types Nat and Str")
         .with_label(Label::new(("b.tao", 10..14))
             .with_message(format!("This is of type {}", "Nat".fg(a)))
             .with_color(a))

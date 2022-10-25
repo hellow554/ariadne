@@ -5,7 +5,7 @@ fn main() {
 
     Report::build(ReportKind::Error, "stresstest.tao", 13)
         .with_code(3)
-        .with_message(format!("Incompatible types"))
+        .with_message("Incompatible types")
         .with_label(Label::new(("stresstest.tao", 0..1)).with_message("Color").with_color(colors.next()))
         .with_label(Label::new(("stresstest.tao", 1..2)).with_message("Color").with_color(colors.next()))
         .with_label(Label::new(("stresstest.tao", 2..3)).with_message("Color").with_color(colors.next()))

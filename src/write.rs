@@ -398,7 +398,7 @@ impl<S: Span> Report<'_, S> {
                     } else {
                         if !self.config.compact && !is_ellipsis {
                             write_margin(&mut w, idx, false, is_ellipsis, false, None, &[], &None)?;
-                            write!(w, "\n")?;
+                            writeln!(w)?;
                         }
                         is_ellipsis = true;
                         continue;
@@ -469,7 +469,7 @@ impl<S: Span> Report<'_, S> {
 
                     }
                 }
-                write!(w, "\n")?;
+                writeln!(w)?;
 
                 // Arrows
                 for row in 0..line_labels.len() {
@@ -513,7 +513,7 @@ impl<S: Span> Report<'_, S> {
                                 write!(w, "{}", if i == 0 { c } else { tail })?;
                             }
                         }
-                        write!(w, "\n")?;
+                        writeln!(w)?;
                     }
 
                     // Margin
@@ -562,7 +562,7 @@ impl<S: Span> Report<'_, S> {
                     if line_label.draw_msg {
                         write!(w, " {}", Show(line_label.label.msg.as_ref()))?;
                     }
-                    write!(w, "\n")?;
+                    writeln!(w)?;
                 }
             }
 
@@ -572,20 +572,20 @@ impl<S: Span> Report<'_, S> {
             if let (Some(note), true) = (&self.help, is_final_group) {
                 if !self.config.compact {
                     write_margin(&mut w, 0, false, false, true, Some((0, false)), &[], &None)?;
-                    write!(w, "\n")?;
+                    writeln!(w)?;
                 }
                 write_margin(&mut w, 0, false, false, true, Some((0, false)), &[], &None)?;
-                write!(w, "{}: {}\n", "Help".fg(self.config.note_color()), note)?;
+                writeln!(w, "{}: {}", "Help".fg(self.config.note_color()), note)?;
             }
 
             // Note
             if let (Some(note), true) = (&self.note, is_final_group) {
                 if !self.config.compact {
                     write_margin(&mut w, 0, false, false, true, Some((0, false)), &[], &None)?;
-                    write!(w, "\n")?;
+                    writeln!(w)?;
                 }
                 write_margin(&mut w, 0, false, false, true, Some((0, false)), &[], &None)?;
-                write!(w, "{}: {}\n", "Note".fg(self.config.note_color()), note)?;
+                writeln!(w, "{}: {}", "Note".fg(self.config.note_color()), note)?;
             }
 
             // Tail of report

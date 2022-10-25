@@ -211,7 +211,7 @@ impl<S: Span> Report<'_, S> {
 
                 // Multi-line margins
                 if draw_labels {
-                    for col in 0..multi_labels.len() + (multi_labels.len() > 0) as usize {
+                    for col in 0..multi_labels.len() + (!multi_labels.is_empty()) as usize {
                         let mut corner = None;
                         let mut hbar = None;
                         let mut vbar: Option<&&Label<S>> = None;
@@ -389,7 +389,7 @@ impl<S: Span> Report<'_, S> {
                 }
 
                 // Skip this line if we don't have labels for it
-                if line_labels.len() == 0 && margin_label.is_none() {
+                if line_labels.is_empty() && margin_label.is_none() {
                     let within_label = multi_labels
                         .iter()
                         .any(|label| label.span.contains(line.span().start()));

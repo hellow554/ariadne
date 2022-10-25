@@ -223,7 +223,7 @@ impl<S: Span> Report<'_, S> {
                         for (i, label) in multi_labels[0..(col + 1).min(multi_labels.len())].iter().enumerate() {
                             let margin = margin_label
                                 .as_ref()
-                                .filter(|m| **label as *const _ == m.label as *const _);
+                                .filter(|m| std::ptr::eq(**label, m.label));
 
                             if label.span.start() <= line_span.end && label.span.end() > line_span.start {
                                 let is_parent = i != col;
@@ -238,7 +238,7 @@ impl<S: Span> Report<'_, S> {
                                     let label_row = line_labels
                                         .iter()
                                         .enumerate()
-                                        .find(|(_, l)| **label as *const _ == l.label as *const _)
+                                        .find(|(_, l)| std::ptr::eq(**label, l.label))
                                         .map_or(0, |(r, _)| r);
                                     if report_row == label_row {
                                         if let Some(margin) = margin {
@@ -262,7 +262,7 @@ impl<S: Span> Report<'_, S> {
                         }
 
                         if let (Some((margin, _is_start)), true) = (margin_ptr, is_line) {
-                            let is_col = multi_label.map_or(false, |ml| **ml as *const _ == margin.label as *const _);
+                            let is_col = multi_label.map_or(false, |ml| std::ptr::eq(**ml, margin.label));
                             let is_limit = col + 1 == multi_labels.len();
                             if !is_col && !is_limit {
                                 hbar = hbar.or(Some(margin.label));
@@ -280,7 +280,7 @@ impl<S: Span> Report<'_, S> {
                         } else if let Some(label) = vbar {
                             (if is_ellipsis { draw.vbar_gap } else { draw.vbar }.fg(label.color), ' '.fg(None))
                         } else if let (Some((margin, is_start)), true) = (margin_ptr, is_line) {
-                            let is_col = multi_label.map_or(false, |ml| **ml as *const _ == margin.label as *const _);
+                            let is_col = multi_label.map_or(false, |ml| std::ptr::eq(**ml, margin.label));
                             let is_limit = col == multi_labels.len();
                             (
                                 if is_limit {

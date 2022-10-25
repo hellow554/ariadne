@@ -1,4 +1,6 @@
-use super::*;
+use std::cmp::Reverse;
+
+use super::{Borrow, Cache, CharSet, Fmt, Label, LabelAttach, Range, Report, ReportKind, Show, Span, Write, draw, io};
 
 // A WARNING, FOR ALL YE WHO VENTURE IN HERE
 //
@@ -24,10 +26,17 @@ struct SourceGroup<'a, S: Span> {
     labels: Vec<LabelInfo<'a, S>>,
 }
 
+struct LineLabel<'a, S> {
+    col: usize,
+    label: &'a Label<S>,
+    multi: bool,
+    draw_msg: bool,
+}
+
 impl<S: Span> Report<'_, S> {
     fn get_source_groups(&self, cache: &mut impl Cache<S::SourceId>) -> Vec<SourceGroup<S>> {
         let mut groups = Vec::new();
-        for label in self.labels.iter() {
+        for label in &self.labels {
             let src_display = cache.display(label.span.source());
             let src = match cache.fetch(label.span.source()) {
                 Ok(src) => src,
@@ -98,8 +107,7 @@ impl<S: Span> Report<'_, S> {
             .filter_map(|SourceGroup { span, src_id, .. }| {
                 let src_name = cache
                     .display(src_id)
-                    .map(|d| d.to_string())
-                    .unwrap_or_else(|| "<unknown>".to_string());
+                    .map_or_else(|| "<unknown>".to_string(), |d| d.to_string());
 
                 let src = match cache.fetch(src_id) {
                     Ok(src) => src,
@@ -110,10 +118,7 @@ impl<S: Span> Report<'_, S> {
                 };
 
                 let line_range = src.get_line_range(span);
-                Some((1..)
-                    .map(|x| 10u32.pow(x))
-                    .take_while(|x| line_range.end as u32 / x != 0)
-                    .count() + 1)
+                Some((line_range.end as f64).log10() as usize + 1)
             })
             .max()
             .unwrap_or(0);
@@ -123,8 +128,7 @@ impl<S: Span> Report<'_, S> {
         for (group_idx, SourceGroup { src_id, span, labels }) in groups.into_iter().enumerate() {
             let src_name = cache
                 .display(src_id)
-                .map(|d| d.to_string())
-                .unwrap_or_else(|| "<unknown>".to_string());
+                .map_or_else(|| "<unknown>".to_string(), |d| d.to_string());
 
             let src = match cache.fetch(src_id) {
                 Ok(src) => src,
@@ -144,8 +148,10 @@ impl<S: Span> Report<'_, S> {
             };
             let (line_no, col_no) = src
                 .get_offset_line(location)
-                .map(|(_, idx, col)| (format!("{}", idx + 1), format!("{}", col + 1)))
-                .unwrap_or_else(|| ('?'.to_string(), '?'.to_string()));
+                .map_or_else(
+                    || ('?'.to_string(), '?'.to_string()),
+                    |(_, idx, col)| (format!("{}", idx + 1), format!("{}", col + 1))
+                );
             let line_ref = format!(":{}:{}", line_no, col_no);
             writeln!(
                 w,
@@ -163,13 +169,6 @@ impl<S: Span> Report<'_, S> {
                 writeln!(w, "{}{}", Show((' ', line_no_width + 2)), draw.vbar.fg(self.config.margin_color()))?;
             }
 
-            struct LineLabel<'a, S> {
-                col: usize,
-                label: &'a Label<S>,
-                multi: bool,
-                draw_msg: bool,
-            }
-
             // Generate a list of multi-line labels
             let mut multi_labels = Vec::new();
             for label_info in &labels {
@@ -179,7 +178,7 @@ impl<S: Span> Report<'_, S> {
             }
 
             // Sort multiline labels by length
-            multi_labels.sort_by_key(|m| -(m.span.len() as isize));
+            multi_labels.sort_by_key(|m| Reverse(m.span.len()));
 
             let write_margin = |
                 w: &mut W, idx: usize,
@@ -211,7 +210,7 @@ impl<S: Span> Report<'_, S> {
 
                 // Multi-line margins
                 if draw_labels {
-                    for col in 0..multi_labels.len() + (!multi_labels.is_empty()) as usize {
+                    for col in 0..multi_labels.len() + usize::from(!multi_labels.is_empty()) {
                         let mut corner = None;
                         let mut hbar = None;
                         let mut vbar: Option<&&Label<S>> = None;
@@ -290,10 +289,10 @@ impl<S: Span> Report<'_, S> {
                                 } else {
                                     draw.hbar
                                 }.fg(margin.label.color),
-                                if !is_limit {
-                                    draw.hbar
-                                } else {
+                                if is_limit {
                                     ' '
+                                } else {
+                                    draw.hbar
                                 }.fg(margin.label.color),
                             )
                         } else {
@@ -453,11 +452,7 @@ impl<S: Span> Report<'_, S> {
                 // Line
                 if !is_ellipsis {
                     for (col, c) in line.chars().enumerate() {
-                        let color = if let Some(highlight) = get_highlight(col) {
-                            highlight.color
-                        } else {
-                            self.config.unimportant_color()
-                        };
+                        let color = get_highlight(col).map_or_else(|| self.config.unimportant_color(), |highlight| highlight.color);
                         let (c, width) = self.config.char_width(c, col);
                         if c.is_whitespace() {
                             for _ in 0..width {

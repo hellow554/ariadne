@@ -5,10 +5,7 @@ pub struct Show<T>(pub T);
 
 impl<T: Display> Display for Show<Option<T>> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match &self.0 {
-            Some(x) => write!(f, "{}", x),
-            None => Ok(()),
-        }
+        self.0.as_ref().map_or(Ok(()), |x| write!(f, "{}", x))
     }
 }
 

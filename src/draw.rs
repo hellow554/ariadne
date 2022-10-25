@@ -1,4 +1,4 @@
-use super::*;
+use super::{Color, fmt};
 use yansi::Paint;
 
 pub struct Characters {
@@ -143,7 +143,7 @@ impl ColorGenerator {
     }
 
     /// Generate the next colour in the sequence.
-    #[allow(clippy::should_implement_trait)]
+    #[allow(clippy::should_implement_trait, clippy::cast_possible_truncation, clippy::cast_lossless, clippy::suboptimal_flops, clippy::cast_sign_loss)]
     pub fn next(&mut self) -> Color {
         for i in 0..3 {
             // magic constant, one of only two that have this property!

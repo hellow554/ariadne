@@ -1,4 +1,4 @@
-use super::*;
+use super::{Eq, Hash, PartialEq, Range, Span, fmt};
 
 use std::{
     path::{Path, PathBuf},
@@ -95,7 +95,7 @@ impl Source {
 
     /// Return an iterator over the characters in the source.
     pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
-        self.lines.iter().flat_map(|l| l.chars())
+        self.lines.iter().flat_map(Line::chars)
     }
 
     /// Get access to a specific, zero-indexed [`Line`].

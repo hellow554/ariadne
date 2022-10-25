@@ -426,7 +426,7 @@ impl<S: Span> Report<'_, S> {
                     // Only labels with notes get an arrow
                     .enumerate()
                     .filter(|(_, ll)| ll.label.msg.is_some() && margin_label.as_ref().map_or(true, |m| ll.label as *const _ != m.label as *const _))
-                    .find(|(j, ll)| ll.col == col && ((row <= *j && !ll.multi) || (row <= *j && ll.multi)))
+                    .find(|(j, ll)| ll.col == col && row <= *j)
                     .map(|(_, ll)| ll);
 
                 let get_highlight = |col| margin_label
@@ -488,7 +488,7 @@ impl<S: Span> Report<'_, S> {
                             let [c, tail] = if let Some(vbar_ll) = vbar {
                                 let [c, tail] = if underline.is_some() {
                                     // TODO: Is this good?
-                                    if vbar_ll.label.span.len() <= 1 || true {
+                                    if /*vbar_ll.label.span.len() <= 1 ||*/ true {
                                         [draw.underbar, draw.underline]
                                     } else if line.offset() + col == vbar_ll.label.span.start() {
                                         [draw.ltop, draw.underbar]
